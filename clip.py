@@ -15,7 +15,6 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-
 class Screenshot(Gtk.Window):
     def __init__(self):
         super(Screenshot, self).__init__()
@@ -79,7 +78,7 @@ class Screenshot(Gtk.Window):
         return True
 
 
-    def hide(self): 
+    def hide(self):
         self.textbox.hide()
         self.textview.hide()
         self.button.hide()
@@ -110,7 +109,6 @@ class Screenshot(Gtk.Window):
             self.queue_draw()
 
     def on_button_release(self, widget, event):
-        print("button released")
         self.drawing = False
         self.capture_area()
         self.show_textbox_and_button(event.x, event.y)
@@ -124,7 +122,7 @@ class Screenshot(Gtk.Window):
         self.textbox.set_size_request(200, 20)
         self.textbox.show()
 
-        # self.textview.grab_focus()
+        self.textbox.grab_focus()
 
     def on_button_clicked(self, button):
         text = self.textbox.get_text()
@@ -139,6 +137,7 @@ class Screenshot(Gtk.Window):
 
         payload = {
             "model": "gpt-4-vision-preview",
+            # "stream": True,
             "messages": [
               {
                 "role": "user",
@@ -161,11 +160,22 @@ class Screenshot(Gtk.Window):
 
         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
 
+        # full_content = ""
+        # for chunk in response:
+        #     full_content += str(chunk)
+        #     print(chunk, "\n", full_content, "\n")
+        #     lines = full_content.split("\n")
+        #     for line in lines:
+        #         if line.startswith("data:"):
+        #             print("Line: ", line, "\n")
+
+
         print(response.json())
 
         ai_msg = response.json()["choices"][0]["message"]["content"]
 
         self.textbuffer.set_text(ai_msg)
+
         self.textview.show()
 
     def capture_area(self):
